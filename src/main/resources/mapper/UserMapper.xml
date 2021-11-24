@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sun.jollygame.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.sun.jollygame.entity.po.DataUserPo">
+        <!--@Table order_base-->
+        <result property="userId" column="user_id" />
+        <result property="username" column="user_name" />
+        <result property="userAddress" column="user_address"/>
+        <result property="flagBin" column="flag_bin" />
+    </resultMap>
+
+    <sql id="userColumn" >
+        user_id,user_name,user_address,flag_bin
+    </sql>
+
+    <select id="listUser" resultMap="BaseResultMap" parameterType="com.sun.jollygame.entity.po.DataUserPo">
+        select <include refid="userColumn"></include>
+        from user
+        <where>
+            <if test="userId != 0">
+                user_id &lt; #{userId}
+            </if>
+            <if test="flagBin != 0">
+                and flag_bin &amp; #{flagBin} = #{flagBin}
+            </if>
+        </where>
+
+    </select>
+</mapper>
