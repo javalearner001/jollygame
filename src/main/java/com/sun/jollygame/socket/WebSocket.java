@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSON;
 import com.sun.jollygame.entity.enumc.MessageTypeEnum;
 import com.sun.jollygame.entity.request.SocketMessage;
 import com.sun.jollygame.entity.response.MessageResponse;
+import com.sun.jollygame.socketservice.GameService;
+import com.sun.jollygame.socketservice.MatchOpponentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -33,8 +35,8 @@ public class WebSocket implements ApplicationContextAware {
     public static final Map<String, WebSocket> webSocketMap = new ConcurrentHashMap<>();
 
     private static ApplicationContext applicationContext;
-    /*private MatchOpponentService matchOpponentService;
-    private PlayChessService playChessService;*/
+    private MatchOpponentService matchOpponentService;
+    private GameService gameService;
 
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
@@ -52,8 +54,8 @@ public class WebSocket implements ApplicationContextAware {
         log.info("[websocket] 有新的连接，总数:{}", webSocketMap.size());
 
         this.session.getAsyncRemote().sendText("恭喜您成功连接上WebSocket-->当前在线人数为：" + webSocketMap.size());
-        /*matchOpponentService = applicationContext.getBean(MatchOpponentService.class);
-        playChessService = applicationContext.getBean(PlayChessService.class);*/
+        matchOpponentService = applicationContext.getBean(MatchOpponentService.class);
+        gameService = applicationContext.getBean(GameService.class);
     }
 
     @OnClose
@@ -79,19 +81,13 @@ public class WebSocket implements ApplicationContextAware {
                 matchOpponent(socketMessage.getUserId());
                 break;
             case 1002:
-                playChess(socketMessage);
+                gameService.startGame(socketMessage);
+                break;
+            case 2000:
+                gameService.receiveHeartMessage(socketMessage);
                 break;
         }
 
-    }
-
-    /**
-     * 下棋
-     * @param socketMessage
-     */
-    private void playChess(SocketMessage socketMessage) {
-
-        //playChessService.lowChess(socketMessage);
     }
 
     /**

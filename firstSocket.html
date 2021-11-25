@@ -19,6 +19,7 @@ userId: <input type="text" id="userId"/>
 <button onclick="logout()">退出登录</button>
 
 <button onclick="matchOpponent()">开始匹配</button>
+<button onclick="startGame()">开始游戏</button>
 <div id="context"></div>
 
 <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
@@ -64,8 +65,9 @@ userId: <input type="text" id="userId"/>
     function setMessageInnerHTML(data) {
         var messageRes = JSON.parse(data);
         console.log("返回的数据：" + JSON.stringify(messageRes));
-        if (messageRes.messageType === 2001){
-
+        if (messageRes.messageType === 2000){
+            //心跳
+            heartBeat();
         }else {
             document.getElementById('context').innerHTML += messageRes.message + '<br/>';
         }
@@ -89,6 +91,20 @@ userId: <input type="text" id="userId"/>
         let send = {};
         send['userId'] = document.getElementById("userId").value;
         send['messageType'] = 1001;
+        websocket.send(JSON.stringify(send));
+    }
+
+    function startGame() {
+        let send = {};
+        send['userId'] = document.getElementById("userId").value;
+        send['messageType'] = 1002;
+        websocket.send(JSON.stringify(send));
+    }
+
+    function heartBeat() {
+        let send = {};
+        send['userId'] = document.getElementById("userId").value;
+        send['messageType'] = 2000;
         websocket.send(JSON.stringify(send));
     }
 

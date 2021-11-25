@@ -1,6 +1,9 @@
 package com.sun.jollygame.singlesource;
 
 
+import com.sun.jollygame.entity.GameRoom;
+import com.sun.jollygame.factory.GameRoomMapFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,16 +13,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2021/11/9 3:47 下午
  */
 public class UserRoomMapFactory {
-    private static Map<String, String> chessRoomMap = new ConcurrentHashMap<>();
+
+    private static final UserRoomMapFactory userRoomMapFactory = new UserRoomMapFactory();
+    private static Map<String, String> userRoomKeyMap = new ConcurrentHashMap<>();
 
     private UserRoomMapFactory(){
 
     }
 
-    public static Map<String, String> getUserRoomMap() {
-        if (chessRoomMap == null) {
-            chessRoomMap = new ConcurrentHashMap<>();
-        }
-        return chessRoomMap;
+    public static UserRoomMapFactory getInstance() {
+        return userRoomMapFactory;
+    }
+
+    public void put(String key, String value){
+        userRoomKeyMap.put(key, value);
+    }
+
+    public String get(String key){
+        return userRoomKeyMap.get(key);
+    }
+
+    public void remove(String key){
+        userRoomKeyMap.remove(key);
     }
 }
