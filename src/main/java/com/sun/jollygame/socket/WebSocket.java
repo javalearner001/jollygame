@@ -45,12 +45,12 @@ public class WebSocket implements ApplicationContextAware {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("userId") String userId) throws SocketException {
-        if (webSocketMap.containsKey(userId)) {
+        if (webSocketMap.containsKey(session.getId())) {
             log.info("此连接已存在！");
             return;
         }
         this.session = session;
-        webSocketMap.put(userId, this);
+        webSocketMap.put(session.getId(), this);
         log.info("[websocket] 有新的连接，总数:{}", webSocketMap.size());
 
         this.session.getAsyncRemote().sendText("恭喜您成功连接上WebSocket-->当前在线人数为：" + webSocketMap.size());
@@ -70,6 +70,7 @@ public class WebSocket implements ApplicationContextAware {
     @OnMessage
     public void onMessage(String message) {
         SocketMessage socketMessage = JSON.parseObject(message, SocketMessage.class);
+        socketMessage.setUserId(this.session.getId());
         log.info("[webSocket]收到客户端发送的消息，socketMessage:{}", JSON.toJSONString(socketMessage));
 
         switch (socketMessage.getMessageType()) {

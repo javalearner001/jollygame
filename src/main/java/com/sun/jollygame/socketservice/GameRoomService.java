@@ -3,6 +3,7 @@ package com.sun.jollygame.socketservice;
 import com.sun.jollygame.entity.GameRoom;
 import com.sun.jollygame.factory.GameRoomMapFactory;
 import com.sun.jollygame.singlesource.UserRoomMapFactory;
+import com.sun.jollygame.socket.WebSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,8 @@ public class GameRoomService {
         //2.删除房间
         mapFactory.remove(gameRoom.getRoomId());
 
+        //3.删除websocket链接
+        WebSocket.webSocketMap.remove(userId);
     }
 
 }

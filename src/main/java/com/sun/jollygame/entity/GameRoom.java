@@ -15,6 +15,10 @@ public class GameRoom {
 
     private String secondUserId;
 
+    private UserGameRecord userGameRecordFirst;
+
+    private UserGameRecord userGameRecordSecond;
+
     public GameRoom(String firstUserId, String secondUserId) {
         this.firstUserId = firstUserId;
         this.secondUserId = secondUserId;
