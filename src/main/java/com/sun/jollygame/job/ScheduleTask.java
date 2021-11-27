@@ -87,11 +87,11 @@ public class ScheduleTask {
     @Scheduled(cron = "0/5 * * * * ?")
     public void getImgId() {
         List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < 30; i++) {
+        for (int i = 1; i < 101; i++) {
             list.add(i);
         }
         List<Integer> imgIdList = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {//显示数字并将其从列表中删除,从而实现不重复.
+        for (int i = 0; i < 5; i++) {//显示数字并将其从列表中删除,从而实现不重复.
             imgIdList.add(list.remove(new Random().nextInt(list.size())));
         }
 
