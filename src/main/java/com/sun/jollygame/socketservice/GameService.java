@@ -1,9 +1,13 @@
 package com.sun.jollygame.socketservice;
 
 import com.alibaba.fastjson.JSON;
+import com.sun.jollygame.entity.GameRoom;
 import com.sun.jollygame.entity.HeartBeat;
+import com.sun.jollygame.entity.UserGameRecord;
 import com.sun.jollygame.entity.request.SocketMessage;
+import com.sun.jollygame.factory.GameRoomMapFactory;
 import com.sun.jollygame.factory.HeartBeatMapFactory;
+import com.sun.jollygame.singlesource.UserRoomMapFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -35,5 +39,17 @@ public class GameService {
         HeartBeatMapFactory heartBeatMapFactory = HeartBeatMapFactory.getInstance();
         HeartBeat heartBeat = heartBeatMapFactory.get(userId);
         heartBeat.setHeartTime(new Date());
+    }
+
+    public void addGrade(SocketMessage socketMessage) {
+        //1.找到房间
+        UserRoomMapFactory userRoomMapFactory = UserRoomMapFactory.getInstance();
+        String roomId = userRoomMapFactory.get(socketMessage.getUserId());
+
+        GameRoomMapFactory gameRoomMapFactory = GameRoomMapFactory.getInstance();
+        GameRoom gameRoom = gameRoomMapFactory.get(roomId);
+        //2.给房间中的用户增加分数
+        UserGameRecord userRecord = gameRoom.getUserRecord(socketMessage.getUserId());
+        userRecord.setGrade(socketMessage.getGrade());
     }
 }

@@ -8,6 +8,7 @@ public enum MessageTypeEnum {
     BROAD_CAST(100, "广播消息"),
     MATCH_OPPONENT(1001, "匹配对手"),
     START_GAME(1002,"开始游戏"),
+    ADD_GRADE(1003,"增加分数"),
     CHECK_BOARD_DATA(2000,"接收心跳信息"),
     ;
 
@@ -33,5 +34,17 @@ public enum MessageTypeEnum {
 
     public void setMsg(String msg) {
         this.msg = msg;
+    }
+
+    public static MessageTypeEnum getFromKey(int key) {
+        if (key == 0){
+            return null;
+        }
+        for (MessageTypeEnum typeEnum : MessageTypeEnum.values()){
+            if (typeEnum.getCode() == key){
+                return typeEnum;
+            }
+        }
+        return null;
     }
 }

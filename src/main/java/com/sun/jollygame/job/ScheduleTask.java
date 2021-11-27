@@ -55,15 +55,17 @@ public class ScheduleTask {
             if (compareTime == null){
                 compareTime = heartBeat.getFirstSendTime();
             }
+            //1.判断倒计时结束，是否赢了
 
-            //1.判断当前是否已断线，或者，已超时
+
+            //2.判断当前是否已断线，或者，已超时
             Date now = new Date();
             if ((now.getTime() - compareTime.getTime()) / 1000 > outTime){
                 //删除
                 deleteUserList.add(heartBeat.getUserId());
             }
 
-            //2.判断是否已经超出对局时间
+            //3.判断是否已经超出对局时间
             if ((now.getTime() - heartBeat.getFirstSendTime().getTime()) / 1000 > playTime + outTime){
                 //删除
                 deleteUserList.add(heartBeat.getUserId());

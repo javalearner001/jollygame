@@ -73,18 +73,27 @@ public class WebSocket implements ApplicationContextAware {
         socketMessage.setUserId(this.session.getId());
         log.info("[webSocket]收到客户端发送的消息，socketMessage:{}", JSON.toJSONString(socketMessage));
 
-        switch (socketMessage.getMessageType()) {
-            case 100:
+        MessageTypeEnum messageTypeEnum = MessageTypeEnum.getFromKey(socketMessage.getMessageType());
+        if (messageTypeEnum == null){
+            log.error("枚举类缺少============");
+            return;
+        }
+
+        switch (messageTypeEnum) {
+            case BROAD_CAST:
                 MessageResponse response = new MessageResponse(socketMessage.getText(), MessageTypeEnum.BROAD_CAST.getCode());
                 sendMessage(response);
                 break;
-            case 1001:
+            case MATCH_OPPONENT:
                 matchOpponent(socketMessage.getUserId());
                 break;
-            case 1002:
+            case START_GAME:
                 gameService.startGame(socketMessage);
                 break;
-            case 2000:
+            case ADD_GRADE:
+                gameService.addGrade(socketMessage);
+                break;
+            case CHECK_BOARD_DATA:
                 gameService.receiveHeartMessage(socketMessage);
                 break;
         }
@@ -133,7 +142,7 @@ public class WebSocket implements ApplicationContextAware {
             String userIdOne = sessionQueue.consume();
             String userIdTwo = sessionQueue.consume();
 
-            //matchOpponentService.createChessRoom(userIdOne, userIdTwo);
+            matchOpponentService.createGameRoom(userIdOne, userIdTwo);
         }
     }
 

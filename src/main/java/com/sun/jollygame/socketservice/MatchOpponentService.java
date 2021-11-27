@@ -22,7 +22,7 @@ public class MatchOpponentService {
 
 
 
-    public void createChessRoom(String userIdOne,String userIdTwo){
+    public void createGameRoom(String userIdOne,String userIdTwo){
         //1.创建房间，存放房间
         GameRoom gameRoom = new GameRoom(userIdOne,userIdTwo);
         GameRoomMapFactory mapFactory = GameRoomMapFactory.getInstance();

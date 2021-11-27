@@ -24,4 +24,12 @@ public class GameRoom {
         this.secondUserId = secondUserId;
         this.roomId = firstUserId + "-" + secondUserId;
     }
+
+    public UserGameRecord getUserRecord(String userId){
+        if (userId.equals(this.userGameRecordFirst.getUserId())){
+            return this.userGameRecordFirst;
+        }else {
+            return this.userGameRecordSecond;
+        }
+    }
 }
