@@ -2,6 +2,8 @@ package com.sun.jollygame.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * 用户游戏记录
  *
@@ -23,4 +25,8 @@ public class UserGameRecord {
      * 用户头像id
      */
     private int headImgId;
+    /**
+     * 用户匹配时间
+     */
+    private Date matchTime;
 }

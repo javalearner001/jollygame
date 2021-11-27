@@ -2,9 +2,13 @@ package com.sun.jollygame.socket;
 
 import com.alibaba.fastjson.JSON;
 
+import com.sun.jollygame.entity.UserGameRecord;
 import com.sun.jollygame.entity.enumc.MessageTypeEnum;
 import com.sun.jollygame.entity.request.SocketMessage;
+import com.sun.jollygame.entity.response.MatchResponse;
 import com.sun.jollygame.entity.response.MessageResponse;
+import com.sun.jollygame.singlesource.ImgIdFactory;
+import com.sun.jollygame.singlesource.UserMapFactory;
 import com.sun.jollygame.socketservice.GameService;
 import com.sun.jollygame.socketservice.MatchOpponentService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.net.SocketException;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,6 +58,11 @@ public class WebSocket implements ApplicationContextAware {
         webSocketMap.put(session.getId(), this);
         log.info("[websocket] 有新的连接，总数:{}", webSocketMap.size());
 
+        UserMapFactory userMapFactory = UserMapFactory.getInstance();
+        UserGameRecord userGameRecord = new UserGameRecord();
+        userGameRecord.setUserId(userId);
+        userMapFactory.put(session.getId(),userGameRecord);
+
         this.session.getAsyncRemote().sendText("恭喜您成功连接上WebSocket-->当前在线人数为：" + webSocketMap.size());
         matchOpponentService = applicationContext.getBean(MatchOpponentService.class);
         gameService = applicationContext.getBean(GameService.class);
@@ -85,7 +95,7 @@ public class WebSocket implements ApplicationContextAware {
                 sendMessage(response);
                 break;
             case MATCH_OPPONENT:
-                matchOpponent(socketMessage.getUserId());
+                matchOpponent(socketMessage);
                 break;
             case START_GAME:
                 gameService.startGame(socketMessage);
@@ -116,34 +126,33 @@ public class WebSocket implements ApplicationContextAware {
     /**
      * 此为单点消息 (发送对象)
      */
-    public void sendObjMessage(MessageResponse message) {
-        this.session.getAsyncRemote().sendText(JSON.toJSONString(message));
+    public void sendObjMessage(String message) {
+        this.session.getAsyncRemote().sendText(message);
     }
 
     /**
      * 匹配对手 加入队列
      */
-    public void matchOpponent(String userId) {
+    public void matchOpponent(SocketMessage socketMessage) {
         SessionQueue sessionQueue = SessionQueue.getSessionQueue();
-
-        if (!sessionQueue.contains(userId)) {
-            try {
-                sessionQueue.produce(userId);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        if (sessionQueue.contains(socketMessage.getUserId())){
+            log.error("您已经在队列中");
+            return;
         }
 
-        MessageResponse messageResponse = new MessageResponse("请稍等，正在为您匹配对手", MessageTypeEnum.BROAD_CAST.getCode());
-        sendObjMessage(messageResponse);
+        try {
+            sessionQueue.produce(socketMessage.getUserId());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //保存用户匹配时间
+        UserMapFactory userMapFactory = UserMapFactory.getInstance();
+        UserGameRecord userGameRecord = userMapFactory.get(socketMessage.getUserId());
+        userGameRecord.setMatchTime(new Date());
+        userGameRecord.setHeadImgId(socketMessage.getHeadImgId());
+
         log.info("队列的数据为:{}", JSON.toJSONString(sessionQueue));
-        //添加之后，判断队列长度，>=2 ,要对队列进行出队列，创建房间
-        if (sessionQueue.size() >= 2) {
-            String userIdOne = sessionQueue.consume();
-            String userIdTwo = sessionQueue.consume();
-
-            matchOpponentService.createGameRoom(userIdOne, userIdTwo);
-        }
+        matchOpponentService.createGameRoom(sessionQueue,socketMessage.getUserId());
     }
 
     @Override

@@ -11,6 +11,8 @@ public class SocketMessage {
 
     private String userId;
 
+    private int headImgId;
+
     private String text;
     /**
      * 消息类型  100：广播消息  1001：匹配开始

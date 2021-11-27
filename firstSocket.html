@@ -34,8 +34,8 @@ userId: <input type="text" id="userId"/>
 
         //判断当前浏览器是否支持WebSocket
         if ('WebSocket'in window) {
-            websocket = new WebSocket("ws://localhost:8081/jollygame/message/" + userId);
-            //websocket = new WebSocket("ws://8.141.63.97:8081/jollygame/message/" + userId);
+            //websocket = new WebSocket("ws://localhost:8081/jollygame/message/" + userId);
+            websocket = new WebSocket("ws://8.141.63.97:8081/jollygame/message");
         } else {
             alert('Not support websocket')
         }

@@ -9,7 +9,10 @@ public enum MessageTypeEnum {
     MATCH_OPPONENT(1001, "匹配对手"),
     START_GAME(1002,"开始游戏"),
     ADD_GRADE(1003,"增加分数"),
-    CHECK_BOARD_DATA(2000,"接收心跳信息"),
+    CHECK_BOARD_DATA(1100,"接收心跳信息"),
+
+    MATCH_OPPONENT_RESP(2001, "匹配对手返回"),
+    START_GAME_RESP(2002,"开始游戏"),
     ;
 
     private int code;

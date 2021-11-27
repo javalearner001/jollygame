@@ -3,8 +3,13 @@ package com.sun.jollygame.job;
 import com.alibaba.fastjson.JSON;
 import com.sun.jollygame.entity.HeartBeat;
 import com.sun.jollygame.entity.enumc.MessageTypeEnum;
+import com.sun.jollygame.entity.response.BoolResponse;
+import com.sun.jollygame.entity.response.MatchResponse;
 import com.sun.jollygame.entity.response.MessageResponse;
 import com.sun.jollygame.factory.HeartBeatMapFactory;
+import com.sun.jollygame.singlesource.ImgIdFactory;
+import com.sun.jollygame.singlesource.UserMapFactory;
+import com.sun.jollygame.socket.SessionQueue;
 import com.sun.jollygame.socket.WebSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,10 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 定时任务
@@ -79,8 +81,49 @@ public class ScheduleTask {
 
     }
 
+    /**
+     * 每5秒生成随机图片
+     */
+    @Scheduled(cron = "0/5 * * * * ?")
+    public void getImgId(){
+        List<Integer> list = new ArrayList<Integer>();
+        for(int i=0;i<30;i++){
+            list.add(i);
+        }
+        List<Integer> imgIdList = new ArrayList<>();
+        for(int i = 0;i<6;i++){//显示数字并将其从列表中删除,从而实现不重复.
+            imgIdList.add(list.remove(new Random().nextInt(list.size())));
+        }
+
+        ImgIdFactory instance = ImgIdFactory.getInstance();
+        instance.updateImgIdList(imgIdList);
+    }
+
+    /**
+     * 每s判断 匹配队列是否只有一人
+     */
+    @Scheduled(cron = "0/1 * * * * ?")
+    public void checkSingleUser(){
+        SessionQueue sessionQueue = SessionQueue.getSessionQueue();
+        if (sessionQueue.size() == 1){
+            String userId = sessionQueue.consume();
+            UserMapFactory mapFactory = UserMapFactory.getInstance();
+            Date matchTime = mapFactory.get(userId).getMatchTime();
+            if ((matchTime.getTime() - new Date().getTime()) / 1000 > 5){
+                BoolResponse boolResponse = new BoolResponse(true);
+                WebSocket.webSocketMap.get(userId).sendObjMessage(JSON.toJSONString(boolResponse));
+            }else {
+                try {
+                    sessionQueue.produce(userId);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     private void sendHeartBeat(String userId) {
         MessageResponse response = new MessageResponse("心跳消息", MessageTypeEnum.CHECK_BOARD_DATA.getCode());
-        WebSocket.webSocketMap.get(userId).sendObjMessage(response);
+        WebSocket.webSocketMap.get(userId).sendObjMessage(JSON.toJSONString(response));
     }
 }
