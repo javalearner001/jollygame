@@ -3,6 +3,7 @@ package com.sun.jollygame.socketservice;
 
 import com.alibaba.fastjson.JSON;
 import com.sun.jollygame.entity.GameRoom;
+import com.sun.jollygame.entity.UserGameRecord;
 import com.sun.jollygame.entity.enumc.MessageTypeEnum;
 import com.sun.jollygame.entity.response.MatchResponse;
 import com.sun.jollygame.entity.response.MessageResponse;
@@ -26,16 +27,23 @@ public class MatchOpponentService {
 
 
     public void createGameRoom(SessionQueue sessionQueue,String userId){
+        ImgIdFactory imgIdFactory = ImgIdFactory.getInstance();
         if (sessionQueue.size() < 2) {
-            MessageResponse messageResponse = new MessageResponse("请稍等，正在为您匹配对手", MessageTypeEnum.BROAD_CAST.getCode());
-            WebSocket.webSocketMap.get(userId).sendObjMessage(JSON.toJSONString(messageResponse));
+            MatchResponse matchResponse = new MatchResponse();
+            matchResponse.setMessage("请稍等，正在为您匹配对手");
+            matchResponse.setMessageType(MessageTypeEnum.MATCH_OPPONENT_RESP.getCode());
+            matchResponse.setImgIdlist(imgIdFactory.getImgList());
+            WebSocket.webSocketMap.get(userId).sendObjMessage(JSON.toJSONString(matchResponse));
             return;
         }
         String userIdOne = sessionQueue.consume();
         String userIdTwo = sessionQueue.consume();
 
         //1.创建房间，存放房间
-        GameRoom gameRoom = new GameRoom(userIdOne,userIdTwo);
+        UserGameRecord recordOne = new UserGameRecord(userIdOne);
+        UserGameRecord recordTwo = new UserGameRecord(userIdTwo);
+        GameRoom gameRoom = new GameRoom(userIdOne,userIdTwo,recordOne,recordTwo);
+
         GameRoomMapFactory mapFactory = GameRoomMapFactory.getInstance();
         mapFactory.put(gameRoom.getRoomId(),gameRoom);
 
@@ -46,12 +54,14 @@ public class MatchOpponentService {
 
         //3.给用户发送消息
         log.info("当前存在房间数:{}", mapFactory.getSize());
-        ImgIdFactory imgIdFactory = ImgIdFactory.getInstance();
+
         UserMapFactory userListFactory = UserMapFactory.getInstance();
         //返回对手的头像信息
-        MatchResponse matchResponseOne = new MatchResponse(imgIdFactory.getImgList(),userListFactory.get(userIdTwo).getHeadImgId());
+        MatchResponse matchResponseOne = new MatchResponse();
+        matchResponseOne.setEnemyHeadImgId(userListFactory.get(userIdTwo).getHeadImgId());
         //返回对手的头像信息
-        MatchResponse matchResponseTwo = new MatchResponse(imgIdFactory.getImgList(),userListFactory.get(userIdOne).getHeadImgId());
+        MatchResponse matchResponseTwo = new MatchResponse();
+        matchResponseTwo.setEnemyHeadImgId(userListFactory.get(userIdOne).getHeadImgId());
         WebSocket.webSocketMap.get(userIdOne).sendObjMessage(JSON.toJSONString(matchResponseOne));
         WebSocket.webSocketMap.get(userIdTwo).sendObjMessage(JSON.toJSONString(matchResponseTwo));
     }

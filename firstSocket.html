@@ -18,8 +18,13 @@ userId: <input type="text" id="userId"/>
 <button onclick="closeWebSocket()">关闭websocket连接</button>
 <button onclick="logout()">退出登录</button>
 
+<br>
+
 <button onclick="matchOpponent()">开始匹配</button>
 <button onclick="startGame()">开始游戏</button>
+<button onclick="setGrade()">设置分数</button>
+<button onclick="setManGrade()">设置赢家分数</button>
+
 <div id="context"></div>
 
 <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
@@ -35,7 +40,7 @@ userId: <input type="text" id="userId"/>
         //判断当前浏览器是否支持WebSocket
         if ('WebSocket'in window) {
             websocket = new WebSocket("ws://localhost:8081/jollygame/message/" + userId);
-            //websocket = new WebSocket("ws://8.141.63.97:8081/jollygame/message");
+            //websocket = new WebSocket("ws://8.141.63.97:8081/jollygame/message/" + userId);
         } else {
             alert('Not support websocket')
         }
@@ -65,7 +70,8 @@ userId: <input type="text" id="userId"/>
     function setMessageInnerHTML(data) {
         var messageRes = JSON.parse(data);
         console.log("返回的数据：" + JSON.stringify(messageRes));
-        if (messageRes.messageType === 2000){
+        if (messageRes.messageType === 1100){
+            document.getElementById('context').innerHTML += messageRes.message + '<br/>';
             //心跳
             heartBeat();
         }else {
@@ -102,10 +108,26 @@ userId: <input type="text" id="userId"/>
         websocket.send(JSON.stringify(send));
     }
 
+    function setGrade() {
+        let send = {};
+        send['userId'] = document.getElementById("userId").value;
+        send['messageType'] = 1003;
+        send['grade'] = 10;
+        websocket.send(JSON.stringify(send));
+    }
+
+    function setManGrade() {
+        let send = {};
+        send['userId'] = document.getElementById("userId").value;
+        send['messageType'] = 1003;
+        send['grade'] = 13;
+        websocket.send(JSON.stringify(send));
+    }
+
     function heartBeat() {
         let send = {};
         send['userId'] = document.getElementById("userId").value;
-        send['messageType'] = 2000;
+        send['messageType'] = 1100;
         websocket.send(JSON.stringify(send));
     }
 

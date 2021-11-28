@@ -29,4 +29,12 @@ public class UserGameRecord {
      * 用户匹配时间
      */
     private Date matchTime;
+    /**
+     * 是否准备好
+     */
+    private Boolean ready = false;
+
+    public UserGameRecord(String userId) {
+        this.userId = userId;
+    }
 }

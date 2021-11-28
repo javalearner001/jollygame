@@ -23,4 +23,13 @@ public class HeartBeat {
      * 返回时间
      */
     private Date heartTime;
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    public HeartBeat(String userId,Date createTime) {
+        this.userId = userId;
+        this.createTime = createTime;
+    }
 }

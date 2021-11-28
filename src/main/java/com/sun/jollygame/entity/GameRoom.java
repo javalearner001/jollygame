@@ -19,10 +19,12 @@ public class GameRoom {
 
     private UserGameRecord userGameRecordSecond;
 
-    public GameRoom(String firstUserId, String secondUserId) {
+    public GameRoom(String firstUserId, String secondUserId,UserGameRecord userGameRecordFirst,UserGameRecord userGameRecordSecond) {
         this.firstUserId = firstUserId;
         this.secondUserId = secondUserId;
         this.roomId = firstUserId + "-" + secondUserId;
+        this.userGameRecordFirst = userGameRecordFirst;
+        this.userGameRecordSecond = userGameRecordSecond;
     }
 
     public UserGameRecord getUserRecord(String userId){
@@ -30,6 +32,14 @@ public class GameRoom {
             return this.userGameRecordFirst;
         }else {
             return this.userGameRecordSecond;
+        }
+    }
+
+    public UserGameRecord getAnotherUserRecord(String userId){
+        if (userId.equals(this.userGameRecordFirst.getUserId())){
+            return this.userGameRecordSecond;
+        }else {
+            return this.userGameRecordFirst;
         }
     }
 }

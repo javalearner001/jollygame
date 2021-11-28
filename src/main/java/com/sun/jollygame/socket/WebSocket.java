@@ -9,6 +9,7 @@ import com.sun.jollygame.entity.response.MatchResponse;
 import com.sun.jollygame.entity.response.MessageResponse;
 import com.sun.jollygame.singlesource.ImgIdFactory;
 import com.sun.jollygame.singlesource.UserMapFactory;
+import com.sun.jollygame.socketservice.GameRoomService;
 import com.sun.jollygame.socketservice.GameService;
 import com.sun.jollygame.socketservice.MatchOpponentService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class WebSocket implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
     private MatchOpponentService matchOpponentService;
     private GameService gameService;
+    private GameRoomService gameRoomService;
 
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
@@ -59,21 +61,20 @@ public class WebSocket implements ApplicationContextAware {
         log.info("[websocket] 有新的连接，总数:{}", webSocketMap.size());
 
         UserMapFactory userMapFactory = UserMapFactory.getInstance();
-        UserGameRecord userGameRecord = new UserGameRecord();
-        userGameRecord.setUserId(userId);
+        UserGameRecord userGameRecord = new UserGameRecord(userId);
         userMapFactory.put(session.getId(),userGameRecord);
 
         this.session.getAsyncRemote().sendText("恭喜您成功连接上WebSocket-->当前在线人数为：" + webSocketMap.size());
         matchOpponentService = applicationContext.getBean(MatchOpponentService.class);
         gameService = applicationContext.getBean(GameService.class);
+        gameRoomService = applicationContext.getBean(GameRoomService.class);
     }
 
     @OnClose
     public void onClose() {
-        String id = this.session.getId();
-        if (id != null) {
-            webSocketMap.remove(id);
-            log.info("[websocket] 连接断开，总数:{}", webSocketMap.size());
+        String userId = this.session.getId();
+        if (userId != null) {
+            gameRoomService.deleteGame(userId);
         }
     }
 
