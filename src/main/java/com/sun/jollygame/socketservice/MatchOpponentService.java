@@ -13,6 +13,7 @@ import com.sun.jollygame.singlesource.UserMapFactory;
 import com.sun.jollygame.singlesource.UserRoomMapFactory;
 import com.sun.jollygame.socket.SessionQueue;
 import com.sun.jollygame.socket.WebSocket;
+import com.sun.jollygame.util.GameUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -57,10 +58,10 @@ public class MatchOpponentService {
 
         UserMapFactory userListFactory = UserMapFactory.getInstance();
         //返回对手的头像信息
-        MatchResponse matchResponseOne = new MatchResponse();
+        MatchResponse matchResponseOne = GameUtil.getMatchResponse(userIdOne,MessageTypeEnum.MATCH_OPPONENT_SUCCESS.getCode());
         matchResponseOne.setEnemyHeadImgId(userListFactory.get(userIdTwo).getHeadImgId());
         //返回对手的头像信息
-        MatchResponse matchResponseTwo = new MatchResponse();
+        MatchResponse matchResponseTwo = GameUtil.getMatchResponse(userIdTwo,MessageTypeEnum.MATCH_OPPONENT_SUCCESS.getCode());
         matchResponseTwo.setEnemyHeadImgId(userListFactory.get(userIdOne).getHeadImgId());
         WebSocket.webSocketMap.get(userIdOne).sendObjMessage(JSON.toJSONString(matchResponseOne));
         WebSocket.webSocketMap.get(userIdTwo).sendObjMessage(JSON.toJSONString(matchResponseTwo));
